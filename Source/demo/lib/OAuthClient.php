@@ -58,7 +58,7 @@ class OAuthClient
 
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
-        echo $output;
+//        echo $output;
         if( $httpCode == 200 ) {
             return true;
         }
