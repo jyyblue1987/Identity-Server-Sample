@@ -1,9 +1,0 @@
-O:20:"FileSystemCacheValue":5:{s:3:"key";O:18:"FileSystemCacheKey":2:{s:3:"key";s:30:"sample_reports/ado/names.pivot";s:5:"group";s:14:"report_headers";}s:5:"value";a:21:{s:7:"Filters";a:0:{}s:9:"Variables";a:1:{s:5:"range";a:7:{s:4:"name";s:5:"range";s:7:"display";s:12:"Report Range";s:4:"type";s:9:"daterange";s:7:"default";a:2:{s:5:"start";s:8:"-120 day";s:3:"end";s:9:"yesterday";}s:5:"empty";b:0;s:8:"multiple";b:0;s:6:"format";s:11:"Y-m-d H:i:s";}}s:8:"Includes";a:0:{}s:4:"Name";s:26:"Registration types per day";s:7:"Created";s:10:"2013-08-14";s:8:"Database";s:3:"ado";s:6:"access";s:8:"readonly";s:8:"noreport";b:0;s:6:"ignore";b:0;s:4:"stop";b:0;s:7:"version";i:1;s:15:"default_dataset";i:0;s:10:"Formatting";a:1:{i:0;a:6:{s:8:"noborder";b:0;s:8:"vertical";b:0;s:5:"table";b:0;s:9:"showcount";b:0;s:6:"nodata";b:0;s:7:"dataset";b:1;}}s:4:"Type";s:8:"AdoPivot";s:11:"Environment";s:4:"main";s:12:"Environments";a:1:{i:0;a:2:{s:4:"name";s:4:"main";s:8:"selected";b:1;}}s:15:"Query_Formatted";s:305:"<pre class='prettyprint linenums lang-yaml'>tables: blocked_accounts
-rows: DATE_FORMAT(registration_date, '%Y-%m-%d') AS "Registration date"
-columns: batch
-where: registration_date BETWEEN "{{ range.start }}" AND "{{ range.end }}"
-#agg_field: uid
-#agg_label: Number of
-agg_fun: SUM
-show_count: true
-</pre>";s:6:"report";s:30:"sample_reports/ado/names.pivot";s:3:"url";s:71:"http://reports.local/report/html/?report=sample_reports/ado/names.pivot";s:6:"is_dir";b:0;s:2:"Id";s:29:"samplereports_ado_names_pivot";}s:3:"ttl";N;s:7:"expires";N;s:7:"created";i:1459439557;}

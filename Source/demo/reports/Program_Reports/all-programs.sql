@@ -15,6 +15,8 @@
 --          report: "drilldown/rep-programs.sql"
 --      }
 -- }
+-- ROLE: Staff
+
 	SELECT TOP 100 PERCENT DM AS 'District Manager',District 
 		FROM TBLDISTRICTS WHERE REGION Like '%' AND ACCOUNT= Coalesce(@Account,Account) 
 		AND ID > @IDLow AND ID <= @IDHigh

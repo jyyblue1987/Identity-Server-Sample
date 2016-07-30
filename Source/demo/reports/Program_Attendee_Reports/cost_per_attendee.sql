@@ -1,5 +1,6 @@
 -- Cost per Attendee
 -- This report lets you view all cost per attendee by program and program type.
+-- ROLE: Manager
 
 select p.ProgramID, p.ProgDate, SUM(e.ExpenseAmt) as [ExpenseTotal], p.ActualAtt, SUM(e.ExpenseAmt) / p.ActualAtt as [Meal Cost Per Attendee],
 	case when p.Dinner = 1 then 'Out-of-Office Dinner' else 

@@ -13,7 +13,7 @@
 --          macros: { "district": { column: "District" }, "when":"All" },
 --          report: "drilldown/district-programs.sql"}
 --      }
-
+-- ROLE: Staff
 -- @dataset true
 -- @title By District
 SELECT 
