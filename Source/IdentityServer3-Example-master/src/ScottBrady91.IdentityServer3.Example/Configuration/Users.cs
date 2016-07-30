@@ -34,7 +34,8 @@ namespace ScottBrady91.IdentityServer3.Example.Configuration
                         new Claim(Constants.ClaimTypes.GivenName, "blue"),
                         new Claim(Constants.ClaimTypes.FamilyName, "jyy"),
                         new Claim(Constants.ClaimTypes.Email, "info@scottbrady91.com"),
-                        new Claim(Constants.ClaimTypes.Role, "Badmin")
+                        new Claim(Constants.ClaimTypes.Role, "Badmin"),
+                        new Claim(Constants.ClaimTypes.Role, "Manager"),
                     }
                 }
             };
