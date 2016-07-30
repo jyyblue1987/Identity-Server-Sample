@@ -445,7 +445,24 @@ class PhpReports {
 
 				try {
 					$data = self::getReportHeaders($name,$base);
-					$return[] = $data;
+
+					// Check roles
+					$content = Report::getReportFileContents($data['report']);
+					preg_match("/-- ROLE: ([a-zA-Z0-9]+)/", $content, $matches);
+					if( empty($matches) || count($matches) < 1 ) {
+						$return[] = $data;
+						continue;
+					}
+
+					if( !isset($_SESSION['profile']) || !isset($_SESSION['profile']['role']) )
+						continue;
+
+
+					$profile_roles = $_SESSION['profile']['role'];
+					$role = $matches[1];
+					if (strpos($profile_roles, $role) !== false) {
+						$return[] = $data;
+					}
 				}
 				catch(Exception $e) {
 					if(!$errors) $errors = array();

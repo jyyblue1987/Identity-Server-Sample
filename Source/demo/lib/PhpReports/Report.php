@@ -222,6 +222,9 @@ class Report {
 	
 	public function parseHeader($name,$value,$dataset=null) {
 		$classname = $name.'Header';
+		if($name == 'Role')
+			return;
+
 		if(class_exists($classname)) {
 			if($dataset !== null && isset($classname::$validation) && isset($classname::$validation['dataset'])) $value['dataset'] = $dataset;
 			$classname::parse($name,$value,$this);

@@ -1,5 +1,7 @@
 -- All Program Attendees
 -- This report lets you view all program attendees on closed programs.
+-- ROLE: Badmin
+
 
 select p.ProgramID, p.ProgDate, pd.VendorOrHost, pd.SiteInfo, att.LName, att.FName, att.SpkrDegree, att.Specialty from tblAttendees att
 	left join Program p on p.ProgramID = att.ProgramID
