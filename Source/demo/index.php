@@ -59,7 +59,7 @@ Flight::route('/',function() {
 });
 
 Flight::route('/callback',function() {
-  var_dump($_POST); // Element 'bar' is string(1) "b"
+//  var_dump($_POST); // Element 'bar' is string(1) "b"
   if(!isset($_POST['access_token']))
     return false;
 
@@ -69,7 +69,8 @@ Flight::route('/callback',function() {
 //  echo $access_token;
   $_SESSION['access_token'] = $access_token;
   $_SESSION['id_token'] = $id_token;
-  OAuthClient::getProfile($access_token);
+  $profile = OAuthClient::getProfile($access_token);
+
   header("Location: " . PhpReports::$config['oauth_api']['logout_redirect_url']);
   exit;
 });

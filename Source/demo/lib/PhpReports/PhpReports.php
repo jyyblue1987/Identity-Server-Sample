@@ -457,10 +457,11 @@ class PhpReports {
 					if( !isset($_SESSION['profile']) || !isset($_SESSION['profile']['role']) )
 						continue;
 
-
 					$profile_roles = $_SESSION['profile']['role'];
 					$role = $matches[1];
-					if (strpos($profile_roles, $role) !== false) {
+
+					if (in_array($role, $profile_roles))
+					{
 						$return[] = $data;
 					}
 				}
