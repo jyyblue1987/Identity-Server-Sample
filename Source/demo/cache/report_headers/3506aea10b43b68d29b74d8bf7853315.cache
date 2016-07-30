@@ -1,0 +1,87 @@
+O:20:"FileSystemCacheValue":5:{s:3:"key";O:18:"FileSystemCacheKey":2:{s:3:"key";s:32:"Program_Reports/all-programs.sql";s:5:"group";s:14:"report_headers";}s:5:"value";a:14:{s:7:"Filters";a:0:{}s:9:"Variables";a:1:{s:5:"range";a:7:{s:4:"name";s:5:"range";s:7:"display";s:12:"Report Range";s:4:"type";s:9:"daterange";s:7:"default";a:2:{s:5:"start";s:9:"yesterday";s:3:"end";s:9:"yesterday";}s:5:"empty";b:0;s:8:"multiple";b:0;s:6:"format";s:11:"Y-m-d H:i:s";}}s:8:"Includes";a:0:{}s:4:"Name";s:12:"All Programs";s:11:"Description";s:152:"
+This report lets you view all programs within a specified time period.
+You can click on a territory to drill down into all programs for that territory.";s:4:"Type";s:6:"SqlSvr";s:8:"Database";s:6:"sqlsvr";s:11:"Environment";s:4:"main";s:12:"Environments";a:1:{i:0;a:2:{s:4:"name";s:4:"main";s:8:"selected";b:1;}}s:15:"Query_Formatted";s:11040:"<pre class='prettyprint linenums lang-sql'><span style="font-weight:bold;">SELECT</span> 
+  <span style="color: #333;">DM</span><span >.</span><span style="color: #333;">DISTRICT</span><span >,</span> 
+  <span style="font-weight:bold;">ISNULL</span>(<span style="color: #333;">DM</span><span >.</span><span style="color: #333;">DMFN</span> <span >+</span> <span style="color: blue;">' '</span> <span >+</span> <span style="color: #333;">DM</span><span >.</span><span style="color: #333;">DMLN</span><span >,</span> <span style="color: blue;">'Vacant'</span>) <span style="font-weight:bold;">AS</span> <span style="color: #333;">DM</span><span >,</span> 
+  <span style="color: #333;">B</span><span >.</span><span style="color: #333;">TERRITORY</span><span >,</span> 
+  <span style="color: #333;">RM</span><span >.</span><span style="color: #333;">REGION</span><span >,</span> 
+  <span style="font-weight:bold;">ISNULL</span>(
+    <span style="color: #333;">REPS</span><span >.</span><span style="color: #333;">REPFN</span> <span >+</span> <span style="color: blue;">' '</span> <span >+</span> <span style="color: #333;">REPS</span><span >.</span><span style="color: #333;">REPLN</span><span >,</span> <span style="color: blue;">'Vacant'</span>
+  ) <span style="font-weight:bold;">AS</span> <span style="color: #333;">REP</span><span >,</span> 
+  <span style="font-weight:bold;">COUNT</span>(
+    <span style="font-weight:bold;">CASE</span> <span style="font-weight:bold;">WHEN</span> <span style="color: #333;">P</span><span >.</span><span style="color: #333;">CANCELLED</span> <span >=</span> <span style="color: green;">1</span> <span style="font-weight:bold;">THEN</span> <span style="color: #333;">P</span><span >.</span><span style="color: #333;">PROGRAMID</span> <span style="font-weight:bold;">END</span>
+  ) <span style="font-weight:bold;">AS</span> <span style="color: #333;">NUMCANCELLED</span><span >,</span> 
+  <span style="font-weight:bold;">COUNT</span>(
+    <span style="font-weight:bold;">CASE</span> <span style="font-weight:bold;">WHEN</span> <span style="color: #333;">P</span><span >.</span><span style="color: #333;">PROGDATE</span> <span >&lt;</span><span >=</span> <span style="color: #333;">GETDATE</span>() 
+    <span style="font-weight:bold;">AND</span> <span style="color: #333;">P</span><span >.</span><span style="color: #333;">CANCELLED</span> <span >=</span> <span style="color: green;">0</span> <span style="font-weight:bold;">THEN</span> <span style="color: #333;">P</span><span >.</span><span style="color: #333;">PROGRAMID</span> <span style="font-weight:bold;">END</span>
+  ) <span style="font-weight:bold;">AS</span> <span style="color: #333;">NUMCOMPLETED</span><span >,</span> 
+  <span style="font-weight:bold;">COUNT</span>(
+    <span style="font-weight:bold;">CASE</span> <span style="font-weight:bold;">WHEN</span> <span style="color: #333;">P</span><span >.</span><span style="color: #333;">PROGDATE</span> <span >&gt;</span> <span style="color: #333;">GETDATE</span>() 
+    <span style="font-weight:bold;">AND</span> <span style="color: #333;">P</span><span >.</span><span style="color: #333;">CANCELLED</span> <span >=</span> <span style="color: green;">0</span> <span style="font-weight:bold;">THEN</span> <span style="color: #333;">P</span><span >.</span><span style="color: #333;">PROGRAMID</span> <span style="font-weight:bold;">END</span>
+  ) <span style="font-weight:bold;">AS</span> <span style="color: #333;">NUMSCHEDULED</span><span >,</span> 
+  <span style="color: #333;">DM</span><span >.</span><span style="color: #333;">DMCOUNTER</span><span >,</span> 
+  <span style="color: #333;">RM</span><span >.</span><span style="color: #333;">RMCOUNTER</span><span >,</span> 
+  <span style="color: #333;">Reps</span><span >.</span><span style="color: #333;">REPCOUNTER</span><span >,</span> 
+  <span style="font-weight:bold;">ISNULL</span>(<span style="color: #333;">RM</span><span >.</span><span style="color: #333;">RMFN</span> <span >+</span> <span style="color: blue;">' '</span> <span >+</span> <span style="color: #333;">RM</span><span >.</span><span style="color: #333;">RMLN</span><span >,</span> <span style="color: blue;">'Vacant'</span>) <span style="font-weight:bold;">AS</span> <span style="color: #333;">RM</span><span >,</span> 
+  <span style="color: #333;">SD</span><span >.</span><span style="color: #333;">SalesArea</span><span >,</span> 
+  <span style="font-weight:bold;">ISNULL</span>(<span style="color: #333;">SD</span><span >.</span><span style="color: #333;">SDFn</span> <span >+</span> <span style="color: blue;">' '</span> <span >+</span> <span style="color: #333;">SD</span><span >.</span><span style="color: #333;">SDLn</span><span >,</span> <span style="color: blue;">'Vacant'</span>) <span style="font-weight:bold;">as</span> <span style="color: #333;">SD</span><span >,</span> 
+  <span style="color: #333;">SD</span><span >.</span><span style="color: #333;">SDCounter</span> 
+<span style="font-weight:bold;">FROM</span> 
+  <span style="color: #333;">PROGRAM</span> <span style="color: #333;">P</span> 
+  <span style="font-weight:bold;">JOIN</span> (
+    <span style="color: #333;">Budget</span> <span style="color: #333;">B</span> 
+    <span style="font-weight:bold;">JOIN</span> (
+      <span style="color: #333;">Territory_Reps</span> <span style="color: #333;">REPS</span> 
+      <span style="font-weight:bold;">JOIN</span> (
+        <span style="color: #333;">District_Managers</span> <span style="color: #333;">DM</span> 
+        <span style="font-weight:bold;">JOIN</span> (
+          <span style="color: #333;">Regional_Managers</span> <span style="color: #333;">RM</span> 
+          <span style="font-weight:bold;">LEFT JOIN</span> <span style="color: #333;">Sales_Directors</span> <span style="color: #333;">SD</span> <span style="font-weight:bold;">ON</span> <span style="color: #333;">RM</span><span >.</span><span style="color: #333;">SalesArea</span> <span >=</span> <span style="color: #333;">SD</span><span >.</span><span style="color: #333;">SalesArea</span>
+        ) <span style="font-weight:bold;">ON</span> <span style="color: #333;">DM</span><span >.</span><span style="color: #333;">Region</span> <span >=</span> <span style="color: #333;">RM</span><span >.</span><span style="color: #333;">Region</span>
+      ) <span style="font-weight:bold;">ON</span> <span style="color: #333;">REPS</span><span >.</span><span style="color: #333;">District</span> <span >=</span> <span style="color: #333;">DM</span><span >.</span><span style="color: #333;">District</span>
+    ) <span style="font-weight:bold;">ON</span> <span style="color: #333;">B</span><span >.</span><span style="color: #333;">Territory</span> <span >=</span> <span style="color: #333;">REPS</span><span >.</span><span style="color: #333;">Terr</span>
+  ) <span style="font-weight:bold;">ON</span> <span style="color: #333;">P</span><span >.</span><span style="color: #333;">PROGRAMID</span> <span >=</span> <span style="color: #333;">B</span><span >.</span><span style="color: #333;">PROGRAMID</span> 
+<span style="font-weight:bold;">WHERE</span> 
+  <span style="color: #333;">B</span><span >.</span><span style="color: #333;">HOSTREP</span> <span >=</span> <span style="color: green;">1</span> 
+  <span style="font-weight:bold;">AND</span> <span style="color: #333;">B</span><span >.</span><span style="color: #333;">TERRITORY</span> <span >&lt;</span><span >&gt;</span> <span style="color: blue;">'00000'</span> 
+  <span style="font-weight:bold;">AND</span> <span style="color: #333;">DM</span><span >.</span><span style="color: #333;">DISTRICT</span> <span style="font-weight:bold;">IS</span> <span style="font-weight:bold;">NOT</span> <span style="font-weight:bold;">NULL</span> 
+<span style="font-weight:bold;">GROUP BY</span> 
+  <span style="color: #333;">DM</span><span >.</span><span style="color: #333;">DISTRICT</span><span >,</span> 
+  <span style="font-weight:bold;">ISNULL</span>(<span style="color: #333;">DM</span><span >.</span><span style="color: #333;">DMFN</span> <span >+</span> <span style="color: blue;">' '</span> <span >+</span> <span style="color: #333;">DM</span><span >.</span><span style="color: #333;">DMLN</span><span >,</span> <span style="color: blue;">'Vacant'</span>)<span >,</span> 
+  <span style="color: #333;">B</span><span >.</span><span style="color: #333;">TERRITORY</span><span >,</span> 
+  <span style="font-weight:bold;">ISNULL</span>(
+    <span style="color: #333;">REPS</span><span >.</span><span style="color: #333;">REPFN</span> <span >+</span> <span style="color: blue;">' '</span> <span >+</span> <span style="color: #333;">REPS</span><span >.</span><span style="color: #333;">REPLN</span><span >,</span> <span style="color: blue;">'Vacant'</span>
+  )<span >,</span> 
+  <span style="color: #333;">DM</span><span >.</span><span style="color: #333;">DMFN</span> <span >+</span> <span style="color: blue;">' '</span> <span >+</span> <span style="color: #333;">DM</span><span >.</span><span style="color: #333;">DMLN</span><span >,</span> 
+  <span style="color: #333;">B</span><span >.</span><span style="color: #333;">DRUG</span><span >,</span> 
+  <span style="color: #333;">RM</span><span >.</span><span style="color: #333;">REGION</span><span >,</span> 
+  <span style="color: #333;">DM</span><span >.</span><span style="color: #333;">DMCOUNTER</span><span >,</span> 
+  <span style="color: #333;">RM</span><span >.</span><span style="color: #333;">RMCOUNTER</span><span >,</span> 
+  <span style="color: #333;">REPS</span><span >.</span><span style="color: #333;">REPCOUNTER</span><span >,</span> 
+  <span style="font-weight:bold;">ISNULL</span>(<span style="color: #333;">RM</span><span >.</span><span style="color: #333;">RMFN</span> <span >+</span> <span style="color: blue;">' '</span> <span >+</span> <span style="color: #333;">RM</span><span >.</span><span style="color: #333;">RMLN</span><span >,</span> <span style="color: blue;">'Vacant'</span>)<span >,</span> 
+  <span style="color: #333;">SD</span><span >.</span><span style="color: #333;">SalesArea</span><span >,</span> 
+  <span style="font-weight:bold;">ISNULL</span>(<span style="color: #333;">SD</span><span >.</span><span style="color: #333;">SDFn</span> <span >+</span> <span style="color: blue;">' '</span> <span >+</span> <span style="color: #333;">SD</span><span >.</span><span style="color: #333;">SDLn</span><span >,</span> <span style="color: blue;">'Vacant'</span>)<span >,</span> 
+  <span style="color: #333;">SD</span><span >.</span><span style="color: #333;">SDCounter</span> 
+<span style="font-weight:bold;">ORDER BY</span> 
+  <span style="color: #333;">B</span><span >.</span><span style="color: #333;">TERRITORY</span><span >,</span> 
+  <span style="color: #333;">DM</span><span >.</span><span style="color: #333;">DISTRICT</span><span >,</span> 
+  <span style="color: #333;">RM</span><span >.</span><span style="color: #333;">REGION</span><span >,</span> 
+  <span style="color: #333;">B</span><span >.</span><span style="color: #333;">DRUG</span></pre>";s:6:"report";s:32:"Program_Reports/all-programs.sql";s:3:"url";s:78:"http://192.168.1.253:8895/report/html/?report=Program_Reports/all-programs.sql";s:6:"is_dir";b:0;s:2:"Id";s:30:"ProgramReports_allprograms_sql";}s:3:"ttl";N;s:7:"expires";N;s:7:"created";i:1469700828;}ght:bold;">ON</span> <span style="color: #333;">PROGRAM</span><span >.</span><span style="color: #333;">PROGRAMID</span> <span >=</span> <span style="color: #333;">L</span><span >.</span><span style="color: #333;">PROGRAMID</span> 
+  <span style="font-weight:bold;">LEFT JOIN</span> <span style="color: #333;">TBLSPEAKERS</span> <span style="color: #333;">K</span> <span style="font-weight:bold;">ON</span> <span style="color: #333;">PROGRAM</span><span >.</span><span style="color: #333;">PROGRAMID</span> <span >=</span> <span style="color: #333;">K</span><span >.</span><span style="color: #333;">PROGRAMID</span> 
+  <span style="font-weight:bold;">JOIN</span> <span style="color: #333;">dbo</span><span >.</span><span style="color: #333;">Territory_Reps</span> <span style="color: #333;">Reps</span> <span style="font-weight:bold;">ON</span> <span style="color: #333;">B</span><span >.</span><span style="color: #333;">TERRITORY</span> <span >=</span> <span style="color: #333;">REPS</span><span >.</span><span style="color: #333;">TERR</span> 
+<span style="font-weight:bold;">WHERE</span> 
+  <span style="color: #333;">PROGRAM</span><span >.</span><span style="color: #333;">PROGDATE</span> <span style="font-weight:bold;">BETWEEN</span> <span style="color: blue;">&quot;{{ range.start }}&quot;</span> 
+  <span style="font-weight:bold;">AND</span> <span style="color: blue;">&quot;{{ range.end }}&quot;</span> 
+  <span style="font-weight:bold;">AND</span> <span style="color: #333;">PROGRAM</span><span >.</span><span style="color: #333;">CANCELLED</span> <span >=</span> <span style="color: green;">0</span> 
+  <span style="font-weight:bold;">AND</span> <span style="color: #333;">B</span><span >.</span><span style="color: #333;">HOSTREP</span> <span >=</span> <span style="color: green;">1</span> 
+  <span style="font-weight:bold;">AND</span> <span style="color: #333;">L</span><span >.</span><span style="color: #333;">CATEGORY</span> <span >=</span> <span style="color: blue;">'Program Location'</span> 
+  <span style="font-weight:bold;">AND</span> <span style="color: #333;">K</span><span >.</span><span style="color: #333;">ID</span> <span >=</span> (
+    <span style="font-weight:bold;">SELECT</span> 
+      <span style="font-weight:bold;">MIN</span>(<span style="color: #333;">TBLSPEAKERS</span><span >.</span><span style="color: #333;">ID</span>) 
+    <span style="font-weight:bold;">FROM</span> 
+      <span style="color: #333;">TBLSPEAKERS</span> 
+    <span style="font-weight:bold;">WHERE</span> 
+      <span style="color: #333;">TBLSPEAKERS</span><span >.</span><span style="color: #333;">PROGRAMID</span> <span >=</span> <span style="color: #333;">PROGRAM</span><span >.</span><span style="color: #333;">PROGRAMID</span>
+  ) 
+<span style="font-weight:bold;">ORDER BY</span> 
+  <span style="color: #333;">PROGRAM</span><span >.</span><span style="color: #333;">PROGRAMID</span></pre>";s:6:"report";s:32:"Program_Reports/all-programs.sql";s:3:"url";s:73:"http://reports.local/report/html/?report=Program_Reports/all-programs.sql";s:6:"is_dir";b:0;s:2:"Id";s:30:"ProgramReports_allprograms_sql";}s:3:"ttl";N;s:7:"expires";N;s:7:"created";i:1459439557;}

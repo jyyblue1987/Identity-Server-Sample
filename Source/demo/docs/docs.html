@@ -1,0 +1,1837 @@
+<!DOCTYPE html>
+<!-- from url=(0049)http://jdorn.github.io/php-reports/#Configuration -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <title>MEI Reports</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Reports - a PHP framework for displaying reports from any data source, including SQL and MongoDB">
+    <meta name="author" content="Jeremy Dorn">
+
+    <!-- Le styles -->
+    <link href="./docs_files/bootstrap.min.css" rel="stylesheet" type="text/css">
+    <style type="text/css">
+      body {
+        padding-top: 60px;
+        padding-bottom: 40px;
+      }
+      section:before {
+	display:block; 
+	content:""; 
+	height:50px; 
+	margin:-50px 0 0; 
+      }
+      #screenshots {
+	-moz-box-shadow: 0 0 10px 2px #ddd;
+	-webkit-box-shadow: 0 0 10px 2px #ddd;
+	box-shadow: 0 0 10px 2px #ddd;
+      }
+    </style>
+    <link href="./docs_files/bootstrap-responsive.min.css" rel="stylesheet">
+    <link href="./docs_files/jquery.tocify.css" rel="stylesheet" type="text/css">
+    <link href="./docs_files/prettify.css" rel="stylesheet" type="text/css">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    
+  </head>
+
+  <body data-spy="scroll" data-target="#sidenav" data-offset="50">
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container-fluid">
+          <a class="brand" href="#">MEI Report Framework</a>
+        </div>
+      </div>
+    </div>
+
+  <div class="container-fluid">
+      <div class="row-fluid">
+        <div class="span3" id="toc"></div>
+        <div class="offset3">
+	 
+	  <section id="configuration">
+	    <h2>Configuration</h2>
+	    
+	    <p>This section describes the different configuration settings.</p>
+	    
+	    <section id="basic_settings">
+	      <h3>Basic Settings</h3>
+	      
+	      <p><strong>reportDir</strong> is the path to the directory containing all of your report files. It is relative to the project's root.</p>
+	      
+	      <p><strong>dashboardDir</strong> is the path to the directory containing all of your dashboard configuration files. It is relative to the project's root.</p>
+	      
+	      <p>
+		<strong>cacheDir</strong> is the path to the cache directory.  
+		This directory needs write access.  
+		Some relatively long term data is stored here, so using <code>/tmp</code> is not recommended.
+		This is also relative to the project's root.
+	      </p>
+	      
+	      <p>
+		<strong>default_file_extension_mapping</strong> defines the default file extensions for different report types.  Here is an example:
+	      </p>
+	      <pre class='prettyprint linenums'>array(
+  'sql'=>'Pdo',
+  'php'=>'Php',
+  'js'=>'Mongo',
+  'ado'=>'Ado',
+  'pivot'=>'AdoPivot',
+)</pre>
+	      <p><em>*Note</em> - This mapping can be overridden on a report-by-report basis if needed.</p>
+	    </section>
+	    <section id="email_settings">
+	      <h3>Email Settings</h3>
+	      
+	      <p>
+		On each report, there is an "Email Report" button.  
+		For this to work, an outgoing mail server needs to be set up.
+		Here are the basic mail settings:
+	      </p>
+	      
+	      <pre class='prettyprint linenums'>'email_settings'=>array(
+  'enabled'=>true,
+  'from'=>'reports@yourdomain.com'
+)</pre>
+	      <p>There are 3 different methods you can use to send email.</p>
+	      
+	      <p><strong>mail</strong> - use PHP's <code>mail</code> function.  This is the simplest method if your server is configured for it.</p>
+	      <pre class='prettyprint linenums'>'email_settings'=>array(
+  'enabled'=>true,
+  'from'=>'reports@yourdomain.com',
+  'method'=>'mail'
+)</pre>
+
+	      <p><strong>sendmail</strong> - use your system's <code>sendmail</code> command.</p>
+	      <pre class='prettyprint linenums'>'email_settings'=>array(
+  'enabled'=>true,
+  'from'=>'reports@yourdomain.com',
+  'method'=>'sendmail',
+  'command'=>'/usr/sbin/sendmail -bs'
+)</pre>
+	      
+	      <p><strong>smtp</strong> - use an SMTP server.  This is the most complex and flexible method.  Here is a simple example:</p>
+	      <pre class='prettyprint linenums'>'email_settings'=>array(
+  'enabled'=>true,
+  'from'=>'reports@yourdomain.com',
+  'method'=>'smtp',
+  'server'=>'smtp.yourdomain.com',
+  'port'=>25
+)</pre>
+
+	    <p>You can also specify encryption and a username and password if needed.  Here is an example for using Gmail:</p>
+	      <pre class='prettyprint linenums'>'email_settings'=>array(
+  'enabled'=>true,
+  'from'=>'youremail@gmail.com',
+  'method'=>'smtp',
+  'server'=>'smtp.gmail.com',
+  'port'=>465,
+  'username'=>'youremail@gmail.com',
+  'password'=>'yourpassword',
+  'encryption'=>'ssl'
+)</pre>	      
+	    </section>
+	    <section id="environments_and_databases">
+	      <h3>Environments and Databases</h3>
+	      
+	      <p>This is where you define the data sources the reports pull from.</p>
+	      
+	      <p>Php Reports supports multiple environments (e.g. "Production" and "Staging") and allows users to switch between them easily.</p>
+	      
+	      <p>
+		Within each environment, you define the database connection info.  
+		You can have as many different databases as you want.  
+		Here is an example:
+	      </p>
+	      
+	      <pre class='prettyprint linenums'>'environments'=>array(
+  'production'=>array(
+    'pdo'=>array(
+      'dsn'=>'mysql:host=localhost;dbname=test',
+      'user'=>'readonly',
+      'pass'=>'password',
+    ),
+    'mongo'=>array(
+      'host'=>'mongodb.yourdomain.com',
+      'port'=>'27017'
+    )
+  )
+)</pre>
+
+	      <p>It is recommended to use readonly database users whenever possible to protect against possible database corruption.</p>
+	      
+	    </section>
+
+          <section id="advanced-settings">
+              <h3>Advanced Settings</h3>
+
+              <p><strong>report_formats</strong> is an array that controls the download options for a report. By default, all the supported download options are allowed:</p>
+                <pre class="prettyprint linenums">array(
+  'csv'=>'CSV',
+  'xlsx'=>'Download Excel 2007',
+  'xls'=>'Download Excel 97-2003',
+  'text'=>'Text',
+  'table'=>'Simple table',
+  // An element with the value "divider" will cause a visual break in the list
+  'raw data'=>'divider',
+  'json'=>'JSON',
+  'xml'=>'XML',
+  'sql'=>'SQL INSERT command',
+  'technical'=>'divider',
+  'debug'=>'Debug information',
+  'raw'=>'Raw report dump',
+)</pre>
+
+              <p>
+                  <strong>bootstrap_themelist</strong> is an array of available bootstrap themes for the theme-switcher.  By default, all the supported themes are allowed:</p>
+              <pre class="prettyprint linenums">array(
+  'default',
+  'amelia',
+  'cerulean',
+  'cosmo',
+  'cyborg',
+  'flatly',
+  'journal',
+  'readable',
+  'simplex',
+  'slate',
+  'spacelab',
+  'united'
+)</pre>
+
+              <p>
+                  <strong>bootstrap_theme</strong> sets the default theme.  If not set, <code>default</code> will be used.
+              </p>
+
+              <p>
+                  <strong>ga_api</strong> configures an optional Google Analytics API integration.  This lets you query Google Analytics from within a PHP Report.
+                  This setting is an associative array with the following properties:
+              </p>
+              <pre class="prettyprint linenums">array(
+  'applicationName'=>'PHP Reports',
+  'clientId'=>'abcdef123456',
+  'clientSecret'=>'1234abcd',
+  'redirectUri'=>'http://example.com/'
+)</pre>
+
+              <p>
+                  <strong>twig_init_function</strong> is an anonymous function that lets you configure the Twig templating engine.
+              </p>
+              <pre class="prettyprint linenums">'twig_init_function'=> function(Twig_Environment $twig) {
+  // Add custom twig plugins here...
+}</pre>
+
+          </section>
+	  </section>
+	  
+	  <section id="report_types">
+	    <h2>Report Types</h2>
+	    
+	    <p>Out of the box, Php Reports supports PDO, AdoDB, MongoDB, and PHP data sources.  It's also easy to add your own custom format.</p>
+	    
+	    <section id="pdo">
+	      <h3>PDO Reports</h3>
+	      
+	      <p>
+		PDO reports consist of 1 or more SQL statements separated by semicolons.
+		By default, the result of the last statement is used for the report.
+		At the top of the report is a comment block with name, description, and any other report headers you need.
+	      </p>
+	      
+	      <p>
+		All PDO reports are parsed with the Twig templating language before running.
+	      </p>
+	      
+	      <pre class='prettyprint linenums lang-sql'>
+-- My Report
+-- This lists all the products that cost
+-- more than a given price.
+-- VARIABLE: { name: "min_price", display: "Minimum Price" }
+
+SELECT Name, Price FROM Products WHERE Price > "{{ min_price }}"</pre>
+
+	      <p>Variables and all the other headers you can use are covered in detail in the <a href="#report_headers">Report Headers</a> section.</p>
+	      
+	      <p>You can also display more than one result in a single report by using special SQL comments.  Here is an example:</p>
+	      
+	      <pre class='prettyprint linenums lang-sql'>
+-- Multiple Datasets
+-- This will display two tables
+
+-- @dataset true
+-- @title Products
+SELECT * FROM Products;
+
+-- @dataset true
+-- @title Orders
+SELECT * FROM Orders;
+</pre>
+	    </section>
+
+        <section id="adodb">
+            <h3>AdoDB reports</h3>
+            <p>
+                There are two types of AdoDB reports - a simple, query based report type (similar to PDO report type) and more complex, pivot table generator.
+            </p>
+
+            <p>
+                In the first case the report will contain one or more SQL queries with the last used for the report.
+                At the top of the report is a comment block with name, description, and any other report headers you need.
+            </p>
+            <p>
+                All AdoDB reports are parsed with the Twig templating language before running.
+            </p>
+
+	      <pre class='prettyprint linenums lang-sql'>
+-- My Report
+-- This lists all the products that cost
+-- more than a given price.
+-- VARIABLE: { name: "min_price", display: "Minimum Price" }
+
+SELECT Name, Price FROM Products WHERE Price > "{{ min_price }}"</pre>
+
+            <p>Variables and all the other headers you can use are covered in detail in the <a href="#report_headers">Report Headers</a> section.</p>
+
+            <p>In order to use different database systems different connection string have to be provided in the configuration file:</p>
+
+	      <pre class='prettyprint linenums'>'environments'=>array(
+  'main'=>array(
+    'ado'=>array(
+      'uri'=>'$driver://$username:$password@hostname/$database?options[=value]'
+    )
+  )
+)</pre>
+
+            <p>A list of supported databases can be found on <a href="http://phplens.com/adodb/supported.databases.html">AdoDB documention website</a>
+                followed by the <a href="http://phplens.com/adodb/code.initialization.html#dsnsupport">explaination on DSN URI format</a>.
+            </p>
+
+            <p>
+                A specific variation of this report type is a PivotTable report type, sometimes reffered to as Cross-Tabulations.
+                AdoDB documentation provide a <a href="http://phplens.com/adodb/pivot.tables.html">good explaination</a> on how this type of query will be created and executed.
+                php-reports include a specific extension to AdoDB report type and in order to simplify the use of this report without a need to create complex SQLs or logic.
+                Still, because it is a specific type of AdoDB report, there are couple of ways to handle them in php-reports right now. The easiest would be to register this type
+                of report in the configuration (this is currently not a default action) and the either to create a new DB configuration entry or to use a specific header for AdoDB
+                database configuration reuse. The examples below assume the latter scenario:
+            </p>
+
+	      <pre class='prettyprint linenums'>'environments'=>array(
+'default_file_extension_mapping' => array(
+    'sql'=>'Pdo',
+    'php'=>'Php',
+    'js'=>'Mongo',
+    'ado'=>'Ado',
+    'pivot'=>'AdoPivot',
+)</pre>
+            <pre class='prettyprint linenums lang-sql'>-- Operations per day
+-- Operations per day grouped by operation type
+-- OPTIONS: {
+--      database: "ado"
+-- }
+-- VARIABLE: {
+--      name: "range",
+--      display: "Report Range",
+--      type: "daterange",
+--      default: { start: "-120 day", end: "yesterday" }
+-- }
+
+tables: blocked_accounts
+rows: DATE_FORMAT(operation_date, '%Y-%m-%d') AS "Date values"
+columns: operation_type
+where: operation_date BETWEEN "{{ range.start }}" AND "{{ range.end }}"
+#agg_field: id
+#agg_label: Number of
+agg_fun: SUM
+show_count: true
+</pre>
+            <p>
+                In the example above OPTIONS header was added to point to AdoDB report type database configuration.
+            </p>
+            <p>
+                The report body consist of a list of parameters required to generate a cross-column query:
+            </p>
+            <table class='table table-bordered table-striped'>
+                <thead>
+                <tr>
+                    <th>Parameter Name</th>
+                    <th>Description</th>
+                    <th>Default Value</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>tables</td>
+                    <td>
+                        A table name or list of tables that the query will use in <code>FROM</code> section of the SQL.
+                        One should follow the format of given DB system, but there is no limitation on the string itself,
+                        i.e.: <code>'products p ,categories c ,suppliers s'</code> will create a query that will check 3 different tables aliased by a single letter.
+                    </td>
+                    <td><code>null</code></td>
+                </tr>
+                <tr>
+                    <td>rows</td>
+                    <td>
+                        A list of columns with to group the data by.
+                    </td>
+                    <td><code>null</code></td>
+                </tr>
+                <tr>
+                    <td>columns</td>
+                    <td>
+                        Columns to pivot on.
+                    </td>
+                    <td><code>null</code></td>
+                </tr>
+                <tr>
+                    <td>where</td>
+                    <td>
+                        Well, it's a WHERE clause. It should consist of both joins of tables if necessary and of the regular filtering of the data.
+                        Obviously variables can and should be used here to build complex queries.
+                    </td>
+                    <td><code>null</code></td>
+                </tr>
+                <tr>
+                    <td>agg_field</td>
+                    <td>
+                        Field to aggregate aside from the groups.
+                    </td>
+                    <td><code>null</code></td>
+                </tr>
+                <tr>
+                    <td>agg_label</td>
+                    <td>
+                        The label for the aggregated field, i.e.: "Number of"
+                    </td>
+                    <td><code>Sum</code></td>
+                </tr>
+                <tr>
+                    <td>agg_fun</td>
+                    <td>
+                        Aggregate function to use (could be <code>AVG</code>, <code>SUM</code>, <code>COUNT</code>).
+                    </td>
+                    <td><code>SUM</code></td>
+                </tr>
+                <tr>
+                    <td>show_count</td>
+                    <td>
+                        Show count of records.
+                    </td>
+                    <td><code>null</code></td>
+                </tr>
+                </tbody>
+            </table>
+
+            <p>In <strong>all</strong> of the above parameters variables are allowed and can be used to make the report more dynamic.</p>
+        </section>
+	    
+	    <section id="mongodb">
+	      <h3>MongoDB Reports</h3>
+	      
+	      <p>MongoDB reports consist of a javascript file that is run in the MongoDB Shell and outputs an array of JSON objects.  Here is an example:</p>
+	      
+	      <pre class='prettyprint linenums'>
+// My Other Report
+// Lists all food products in a MongoDB collection
+// MONGODATABASE: MyDatabase
+// VARIABLE: { name: "active_only", display: "Active Items Only?", type: "select", options: ["yes","no"] }
+
+var query = {type: 'food'};
+
+if(active_only == 'yes') {
+    query.status = 'active';
+}
+
+var result = db.FoodItems.find(query);
+
+printjson(result);</pre>
+
+	      <p>You can include more than one dataset in a single MongoDB report by using a different return JSON format.  Here's an example:</p>
+	      
+	      <pre class='prettyprint linenums'>
+// Multiple Datasets
+
+printjson([
+  {
+    title: "Foods",
+    rows: [
+      {
+	name: "banana",
+	type: "fruit"
+      },
+      {
+	name: "bacon",
+	type: "meat"
+      }
+    ]
+  },
+  {
+    title: "Beverages",
+    rows: [
+      {
+	'beverage name': "water",
+	temperature: "cold"
+      },
+      {
+	'beverage name': "coffee",
+	temperature: "hot"
+      }
+    ]
+  }
+]);
+</pre>
+
+	    </section>
+	    
+	    <section id="php">
+	      <h3>PHP Reports</h3>
+	      
+	      <p>
+		You can also write reports using PHP.  
+		PHP reports must output JSON data, just like MongoDB reports above.
+	      </p>
+	      
+	      <p>
+		Writing reports in PHP is especially useful for fetching data from APIs or doing complex data processing that is out of the scope of SQL.
+		Here is an example:
+	      </p>
+	      
+	      <pre class='prettyprint linenums'>
+&lt;?php
+//My Third Report
+//This connects to the Stripe Payments api and shows a list of charges
+//VARIABLE: { name: "count", display: "Number of Charges" }
+
+if($count &gt; 100 || $count &lt; 1) throw new Exception("Number of Charges must be between 1 and 100");
+
+require_once("/path/to/Stripe/Stripe.php");
+
+$charges = Stripe_Charge::all(array("count" =&gt; $count));
+
+$rows = array();
+foreach($charges as $charge) {
+    $rows[] = array(
+        'Charge Id'=&gt;$charge-&gt;id,
+        'Amount'=&gt;number_format($charge-&gt;amount/100,2),
+        'Date'=&gt;date('Y-m-d',$charge-&gt;created)
+    );
+}
+
+echo json_encode($rows);
+?&gt;</pre>
+
+	      <p>Just like with MongoDB reports, you can include multiple datasets by using a different output format.  Here's an example:</p>
+	      <pre class='prettyprint linenums'>
+// Multiple Datasets
+
+echo json_encode(array(
+  array(
+    'title'=>'Dataset 1',
+    'rows'=>array(
+      array(
+	'first name'=>'John',
+	'last name'=>'Smith'
+      ),
+      array(
+	'first name'=>'Jane',
+	'last name'=>'Doe'
+      )
+    )
+  ),
+  array(
+    'title'=>'Dataset 2',
+    'rows'=>array(
+      array(
+	'company'=>'Acme Inc.',
+	'year started'=>'1950'
+      ),
+      array(
+	'company'=>'Star Fleet',
+	'year started'=>'2215'
+      )
+    )
+  )
+));	      
+</pre>
+	    </section>
+	    
+	    <section id="custom_types">
+	      <h3>Custom Report Types</h3>
+	      
+	      <p>
+		Adding your own report type is easy.  
+		Report Type classes extend <strong>ReportTypeBase</strong> and live in <code>classes/report_types/</code>.  
+		You can also place them in <code>classes/local/report_types/</code> if you want them ignored by git.
+	      </p>
+	      
+	      <p>
+		The existing report type classes are well commented and are the best place to start when making your own.
+	      </p>
+	    </section>
+	  </section>
+	  
+	  <section id="report_headers">
+	    <h2>Report Headers</h2>
+	    
+	    <p>
+	      At the top of every report in a block of comments containing name, description, 
+	      and various headers that alter the appearance or behavior in some way.
+	    </p>
+	    
+	    <p>
+	      The first header line is always the report name.  Then comes an optional description followed by any named headers.
+	    </p>
+	    
+	    <div class='alert alert-info'>
+	      Note: There must be a blank line between the headers and the report.
+	    </div>
+	    
+	    <pre class='prettyprint linenums lang-sql'>
+-- This is the Report Name
+-- This is a report description
+-- that can be on multiple lines
+-- HEADERNAME: This is a named header
+
+SELECT * FROM MyTable;</pre>
+	    
+	    <section id="variables">
+	      <h3>Variable Header</h3>
+	      <p>
+		This header adds a "Configure Report" section to the top of the report where the user can set variables you specify.
+		The values of these variables are passed into the report and can be used in queries.
+	      </p>
+	      
+	      <table class='table table-bordered table-striped'>
+		<thead>
+		  <tr>
+		    <th>Parameter Name</th>
+		    <th>Type</th>
+		    <th>Description</th>
+		    <th>Default Value</th>
+		  </tr>
+		</thead>
+		<tbody>
+		  <tr>
+		    <td>database_options</td>
+		    <td>object</td>
+		    <td>
+		      If type is "select", this tells the framework to populate the drop down list from the database.  It has the following properties:
+		      <ul>
+			<li><strong>table</strong> - The database table to select from</li>
+			<li><strong>column</strong> - The column to select for the value</li>
+			<li><strong>display</strong> - The column to select for the display text (optional, defaults to value column)</li>
+			<li><strong>where</strong> - An optional WHERE clause</li>
+			<li><strong>all</strong> - If set to true, an addional option named "ALL" will be added to the top of the list.</li>
+		      </ul>
+		    </td>
+		    <td><code>null</code></td>
+		  </tr>
+		  <tr>
+		    <td>default</td>
+		    <td>mixed</td>
+		    <td>
+		      The default value for the variable.  Will be pre-populated when the report is opened.
+		    </td>
+		    <td><code>null</code></td>
+		  </tr>
+		  <tr>
+		    <td>description</td>
+		    <td>string</td>
+		    <td>
+		      Add an optional description for this variable.  This shows up as help text in the "Configure Report" section.
+		    </td>
+		    <td><code>null</code></td>
+		  </tr>
+		  <tr>
+		    <td>display</td>
+		    <td>string</td>
+		    <td>The display name of the variable.  This is shown to the user in the Configure Report section.  If this isn't set, the variable name will be used.</td>
+		    <td><code>null</code></td>
+		  </tr>
+		  <tr>
+		    <td>empty</td>
+		    <td>boolean</td>
+		    <td>
+		      If true, the report will run even if the value is empty.
+		    </td>
+		    <td><code>false</code></td>
+		  </tr>
+		  <tr>
+		    <td>format</td>
+		    <td>string</td>
+		    <td>
+		      If type is "date" or "daterange", this specifies the date format to convert to before passing into the report.  Format follows PHP's date methods.  This options will be ignored for all other types.
+		    </td>
+		    <td>
+		      <code>"Y-m-d H:i:s"</code>
+		    </td>
+		  </tr>
+		  <tr>
+		    <td>modifier_options</td>
+		    <td>array</td>
+		    <td>
+		      Adds a modifier dropdown before the input with the specified options.  Common values are ["=","!=","&gt;","&lt;"] or ["starts with","ends with","contains"].  Passed into the report as a variable named {{name}}_modifier.
+		    </td>
+		    <td><code>null</code></td>
+		  </tr>
+		  <tr>
+		    <td>multiple</td>
+		    <td>boolean</td>
+		    <td>
+		      If true and type is "select", the input will change to a multi-select box and the value will be an array.
+		      If true and type is "textarea", the input will be split by linebreaks and the value will be an array.
+		      This option is ignored for all other types.
+		    </td>
+		    <td><code>false</code></td>
+		  </tr>
+		  <tr>
+		    <td>name</td>
+		    <td>string</td>
+		    <td>The name of the variable when it's passed into the report.  Must be a valid variable name (i.e. no spaces or weird punctuation)</td>
+		    <td><code>null</code></td>
+		  </tr>
+		  <tr>
+		    <td>options</td>
+		    <td>array or object</td>
+		    <td>
+		      If type is "select", these are the options that populate the select box.
+		      Can be an array or object with key value pairs.
+		      If type is anything other than "select", this option is ignored.
+		    </td>
+		    <td><code>[]</code></td>
+		  </tr>
+		  <tr>
+		    <td>type</td>
+		    <td>string</td>
+		    <td>The type of variable.  Valid types are "text", "select", "textarea", "date", and "daterange".</td>
+		    <td><code>"text"</code></td>
+		  </tr>
+		</tbody>
+	      </table>
+	      
+	      <h4>Examples</h4>
+		      
+	      <p>A simple text variable: </p>
+	      
+	      <pre class='prettyprint linenums'>VARIABLE: { name: "userid", display: "User Id" }</pre>
+	      
+	      <p>Select variables show a dropdown menu with the defined choices.</p>
+	      
+	      <pre class='prettyprint linenums'>
+VARIABLE: { 
+  name: "category", 
+  display: "Category", 
+  type: "select", 
+  options: ["Reptile","Mammal","Dinosaur"] 
+}</pre>
+
+	      <p>Date variables are parsed with <code>strtotime</code> before being passed into the report.  This means it supports all common date formats as well as relative values like "-1 week" and "last tuesday".</p>
+	      
+	      <pre class='prettyprint linenums'>VARIABLE: { name: "start", display: "Start Date", type: "date", format: "F j, Y" }</pre>
+
+	      <p>Daterange variables use a nice datepicker widget to select a date range (similar to airline or hotel sites. It has presets for things like "yesterday", "last week", "this month", etc.  The value of the variable is an object containing the properties "start" and "end".  Both of these dates are in the format "Y-m-d".</p>
+	      
+	      <pre class='prettyprint linenums'>
+VARIABLE: {
+    "name": "range",
+    "type": "daterange",
+    "default": {
+        "start": "-1 week",
+        "end": "now"
+    }
+}</pre>
+	    </section> <!--/variable header-->
+	    
+	    <section id="charts">
+	      <h3>Chart Header</h3>
+	      <p>
+		This header adds a graph or chart to the report.  Charts are drawn using the Google Data Visualization API and many different formats are available.
+	      </p>
+	      
+	      <table class='table table-bordered table-striped'>
+		<thead>
+		  <tr>
+		    <th>Parameter Name</th>
+		    <th>Type</th>
+		    <th>Description</th>
+		    <th>Default Value</th>
+		  </tr>
+		</thead>
+		<tbody>
+		  <tr>
+		    <td>buckets</td>
+		    <td>integer</td>
+		    <td>
+		      When drawing a histogram, this defines how many buckets to split the data into.  If xhistogram is false, this parameter is ignored.
+		    </td>
+		    <td><code>10</code></td>
+		  </tr>
+		  <tr>
+		    <td>colors</td>
+		    <td>array</td>
+		    <td>
+		      Colors for the different data series.  Supports hex colors and css color names.  If empty, the default Google colors will be used.
+		    </td>
+		    <td>
+		      <code>[]</code>
+		    </td>
+		  </tr>
+		  <tr>
+		    <td>columns</td>
+		    <td>array</td>
+		    <td>
+		      The columns to include in the chart.  You can specify columns by their number (starting with 1) or their name.  The column order is important and depends on the type of chart.  See examples below for details.
+		    </td>
+		    <td>All the columns in order</td>
+		  </tr>
+		  <tr>
+		    <td>dataset</td>
+		    <td>number|array|boolean</td>
+		    <td>
+		      Which dataset to pull the chart data from.  If <code>true</code>, the chart will be rendered for every dataset.  If array, the chart will be rendered for each dataset in the array (datasets are numbered starting at 0).  If a number, only that dataset will be used.
+		    </td>
+		    <td><code>0</code></td>
+		  </tr>
+		  <tr>
+		    <td>height</td>
+		    <td>string</td>
+		    <td>
+		      The height of the chart.  Supports any css dimension (e.g. "200px", "25%", etc.).
+		    </td>
+		    <td><code>"400px"</code></td>
+		  </tr>
+		  <tr>
+		    <td>markers</td>
+		    <td>boolean</td>
+		    <td>
+		      The chart type "GeoChart" has two modes.  The region mode colorizes whole regions, such as countries, provinces, or states.  The marker mode marks designates regions using bubbles that are scaled according to a value that you specify.  If this property is true, the map will be in markers mode.  Otherwise, it will be in region mode.  If using another chart type, this option is ignored.
+		    </td>
+		    <td><code>false</code></td>
+		  </tr>
+		  <tr>
+		      <td>options</td>
+		      <td>object</td>
+		      <td>Any additional options to pass into Google Charts.  Should be a JSON object.</td>
+		      <td><code>null</code></td>
+		  </tr>
+		  <tr>
+		    <td>title</td>
+		    <td>string</td>
+		    <td>
+		      An optional title for the chart.  Will appear at the top.
+		    </td>
+		    <td><code>null</code></td>
+		  </tr>
+		  <tr>
+		    <td>type</td>
+		    <td>string</td>
+		    <td>
+		      The type of chart.  Possible values are:
+		      <ul>
+			<li><strong>LineChart</strong></li>
+			<li><strong>GeoChart</strong></li>
+			<li><strong>AnnotatedTimeLine</strong> - Similar to Google Finance</li>
+			<li><strong>BarChart</strong></li>
+			<li><strong>ColumnChart</strong></li>
+		      </ul>
+		    </td>
+		    <td><code>"LineChart"</code></td>
+		  </tr>
+		  <tr>
+		    <td>width</td>
+		    <td>string</td>
+		    <td>
+		      The width of the chart.  Supports any css dimension (e.g. "200px", "25%", etc.).
+		    </td>
+		    <td><code>"100%"</code></td>
+		  </tr>
+		  <tr>
+		    <td>xhistogram</td>
+		    <td>boolean</td>
+		    <td>
+		      If true, a histogram will be constructed using the first passed column as the x axis.
+		    </td>
+		    <td><code>false</code></td>
+		  </tr>
+		</tbody>
+	      </table>
+	      
+	      <h4>Examples</h4>
+	      
+	      <p>
+		For charts of type "LineChart", "BarChart", and "ColumChart", the first column is the x axis.  Each following column is a data series on the y axis.
+	      </p>
+	      
+	      <pre class='prettyprint linenums'>
+CHART: {
+	"columns": ["Product", "Started Purchase", "Completed Purchase"],
+	"type": "LineChart",
+	"title": "Shopping Cart Abandonment",
+	"width": "600px",
+	"height": "400px"
+}</pre>
+
+	      <p>
+		The chart type "GeoChart" supports many different formats.  Checkout <a href="https://developers.google.com/chart/interactive/docs/gallery/geochart">https://developers.google.com/chart/interactive/docs/gallery/geochart</a> for full documentation of the different column orders supported.
+	      </p>
+	      
+	      <pre class='prettyprint linenums'>
+CHART: {
+  type: "GeoChart",
+  columns: ["State", "Number of Sales"]
+}</pre>
+	      
+	      <pre class='prettyprint linenums'>
+CHART: {
+  type: "GeoChart",
+  columns: ["Lattitude", "Longitude", "Population"],
+  markers: true
+}</pre>
+
+	      <p>
+		"AnnotatedTimeLine" charts are used to show time series data with important events marked.  The first column is either a date or datetime.  Many different date formats are supported, but it's safest to use either "Y-m-d" or "m/d/Y".  The second column is the numeric value on the y axi
+	      </p>
+	      
+	      <p>
+		There are 2 more optional columns that add annotations for specific data points.  The third column contains an annotation title (e.g. "Hottest day on record").  The fourth column contains a more detailed description.  Check out <a href="https://developers.google.com/chart/interactive/docs/gallery/annotatedtimeline">https://developers.google.com/chart/interactive/docs/gallery/annotatedtimeline</a> for full documentation.
+	      </p>
+	      
+	      <pre class='prettyprint linenums'>
+CHART: {
+  type: "AnnotatedTimeLine",
+  columns: ["Purchase Timestamp", "Order Total", "Order Notes"]
+}
+</pre>
+
+	      <p>
+		Histograms take a single numeric column, split the x-axis into ranges, and plot the distribution of data across these ranges.
+		Histograms work with the types "LineChart", "BarChart", and "ColumnChart".
+	      </p>
+	      
+	      <pre class='prettyprint linenums'>
+CHART: {
+  type: "ColumnChart",
+  columns: ["Order Total"],
+  xhistogram: true,
+  buckets: 10
+}</pre>
+
+	    </section> <!--/chart header-->
+	    
+	    <section id="include">
+	      <h3>Include Header</h3>
+	      
+	      <p>Includes another report in the currently running one.</p>
+
+	      <p>The included report's headers are parsed and the report contents are prepended to the current report before running.</p>
+
+	      <p>Possible uses include:</p>
+	      
+	      <ul>
+		<li>Creating a temp table for a set of MySql reports</li>
+		<li>Defining helper functions for MongoDB or PHP reports</li>
+		<li>Setting up an API connection for a PHP report</li>
+	      </ul>
+	      	      
+	      <table class='table table-bordered table-striped'>
+		<thead>
+		  <tr>
+		    <th>Parameter Name</th>
+		    <th>Type</th>
+		    <th>Description</th>
+		    <th>Default Value</th>
+		  </tr>
+		</thead>
+		<tbody>
+		  <tr>
+		    <td>report</td>
+		    <td>string</td>
+		    <td>The path to a report to include. If it starts with "/", it will be relative to the root report directory. Otherwise, it will be relative to the currently running report.</td>
+		    <td><code>null</code></td>
+		  </tr>
+		</tbody>
+	      </table>
+	      
+	      <h4>Examples</h4>
+	      
+	      <pre class='prettyprint linenums'>INCLUDE: {"report": "relative/to/current/report.sql"}</pre>
+	      
+	      <pre class='prettyprint linenums'>INCLUDE: {"report": "/relative/to/reportdir/report.sql"}</pre>
+	    </section><!--/include-->
+	    <section id="filter">
+	      <h3>Filter Header</h3>
+	      
+	      <p>The Filter header modifies all the values in a column.</p>
+	      
+	      <p>Some possible uses include:</p>
+	      
+	      <ul>
+		<li>Replace an ip address with the city, state where it is located</li>
+		<li>Star Rating filter that replaces a numberic column (1-5) with images of stars</li>
+		<li>Right align values</li>
+		<li>Link a user id in one report to a differnt report with that user's full account history</li>
+	      </ul>
+	      
+	      <div class='alert alert-info'>
+		Specific filters have their own documentation. This just explains the FILTER header itself.
+	      </div>
+	      
+	      <table class='table table-bordered table-striped'>
+		<thead>
+		  <tr>
+		    <th>Parameter Name</th>
+		    <th>Type</th>
+		    <th>Description</th>
+		    <th>Default Value</th>
+		  </tr>
+		</thead>
+		<tbody>
+		  <tr>
+		    <td>column</td>
+		    <td>string</td>
+		    <td>The column to apply the filter to.  Can be either the column number (starting at 1) or the column name.</td>
+		    <td><code>null</code></td>
+		  </tr>
+		  <tr>
+		    <td>dataset</td>
+		    <td>number|array|boolean</td>
+		    <td>
+		      Which dataset(s) to apply the filter to.  If <code>true</code>, will apply filter every dataset.  If array, will apply filter to each dataset in the array (datasets are numbered starting at 0).  If a number, only that dataset will have the filtered applied.
+		    </td>
+		    <td><code>0</code></td>
+		  </tr>
+		  <tr>
+		    <td>filter</td>
+		    <td>string</td>
+		    <td>The filter to apply to the column.</td>
+		    <td><code>null</code></td>
+		  </tr>
+		  <tr>
+		    <td>params</td>
+		    <td>object</td>
+		    <td>The params to pass into the filter.  The allowed params differe depending on the filter used.</td>
+		    <td><code>{}</code></td>
+		  </tr>
+		</tbody>
+	      </table>
+	      
+	      <h4>Examples</h4>
+	      
+	      <pre class='prettyprint linenums'>FILTER: {"column": "Ip Address", "filter": "geoip"}</pre>
+	      
+	      <pre class='prettyprint linenums'>
+FILTER: {
+    "column": "Article", 
+    "filter": "link",
+    "params": {
+        "blank": true,
+        "display": "View Article"
+    }
+}</pre>
+	      
+	    </section><!--/include header-->
+	    
+	    <section id="rollups">
+	      <h3>Rollup Header</h3>
+	      
+	      <p>The Rollup header adds a footer row to the bottom of the report containing summary information that you specify.</p>
+	      
+	      <p>This header is most useful for showing sums and averages for numeric columns, but it is flexible enough to allow any kind of summary data.</p>
+	      
+	      <table class="table table-bordered table-striped">
+		<thead>
+		  <tr>
+		    <th>Parameter Name</th>
+		    <th>Type</th>
+		    <th>Description</th>
+		    <th>Default Value</th>
+		  </tr>
+		</thead>
+		<tbody>
+		  <tr>
+		    <td>columns</td>
+		    <td>object</td>
+		    <td>
+		      An object where the keys are column names and the values are Twig templates that output the desired value. The following variables are available in the Twig template:
+		      
+		      <ul>
+			<li>values - an array of all the non-empty values in the column</li>
+			<li>sum</li>
+			<li>count</li>
+			<li>mean</li>
+			<li>median</li>
+			<li>min</li>
+			<li>max</li>
+			<li>stdev</li>
+		      </ul>
+		    </td>
+		    <td><code>{}</code></td>
+		  </tr>
+		  <tr>
+		    <td>dataset</td>
+		    <td>number|array|boolean</td>
+		    <td>
+		      Which dataset to apply the rollup to.  If <code>true</code>, will apply rollup to every dataset.  If array, will apply rollup for each dataset in the array (datasets are numbered starting at 0).  If a number, will apply rollup to the dataset specified.
+		    </td>
+		    <td><code>0</code></td>
+		  </tr>
+		</tbody>
+	      </table>
+	      
+	      <h4>Examples</h4>
+	      
+	      <pre class="prettyprint linenums">
+ROLLUP: {
+  columns: {
+    "Product": "Total:",
+    "Number Sold": "{{sum}}"
+  }
+}</pre>
+	      
+	      <pre class="prettyprint linenums">
+ROLLUP: {
+  columns: {
+    "Name": "First alphabetical name - {{min}}.  Last alphabetical name - {{max}}."
+  }
+}</pre>
+	      
+	      <pre class="prettyprint linenums">
+ROLLUP: {
+  columns: {
+    "Quantity": "
+      Every Third Value: 
+      {% for value in values if value is disibleby 3 %}
+	{% if not loop.first %}, {% endif %}
+	{{ value }}
+      {% endfor %}
+    "
+  }
+}</pre>
+	    </section><!--/rollup header-->
+	    
+	    <section id="options">
+	      <h3>Options Header</h3>
+	      
+	      <p>
+		The Options header lets you change miscellaneous report options that change the behavior in some way.
+	      </p>
+	      
+	      <table class="table table-bordered table-striped">
+		<thead>
+		  <tr>
+		    <th>Parameter Name</th>
+		    <th>Type</th>
+		    <th>Description</th>
+		    <th>Default Value</th>
+		  </tr>
+		</thead>
+		<tbody>
+		  <tr>
+		    <td>cache</td>
+		    <td>integer</td>
+		    <td>
+		      The number of seconds to cache the report results for.  If set to 0, the results will not be cached.
+		    </td>
+		    <td><code>0</code></td>
+		  </tr>
+		  <tr>
+		    <td>database</td>
+		    <td>string</td>
+		    <td>
+		      The database connection info to use in the current environment.  By default, this is the same as the report type.  For example, if this is a PDO report type, the database named "pdo" will be used.  Mongo reports will use the database "mongo" by default.
+		    </td>
+		    <td>varies</td>
+		  </tr>
+		  <tr>
+		    <td>default_dataset</td>
+		    <td>number</td>
+		    <td>
+		      The datasource that will be used when outputting in formats that don't support multiple datasources (like CSV).  Datasources are numbered starting at 0.
+		    </td>
+		    <td>0</td>
+		  </tr>
+		  <tr>
+		    <td>ignore</td>
+		    <td>boolean</td>
+		    <td>
+		      If true, the report won't show up in the report list or report search.  You can still link to the report directly or include it from within other reports.
+		    </td>
+		    <td><code>false</code></td>
+		  </tr>
+		  <tr>
+		    <td>mongodatabase</td>
+		    <td>string</td>
+		    <td>
+		      If the report is a MongoDB report, you can specify a database to connect to in the shell.  Doing this will make the <code>db</code> variable available in your report.  If you omit this option, you need to add <code>use MyDatabase</code> or something similar at the top of your report.
+		    </td>
+		    <td><code>"test"</code></td>
+		  </tr>
+		</tbody>
+	      </table>
+	      
+	    </section><!--/options header-->
+	    
+	    <section id="formatting">
+	      <h3>Formatting Header</h3>
+	      
+	      <p>
+		The Formatting header lets you change how datasets are formatted.
+	      </p>
+	      
+	      <table class="table table-bordered table-striped">
+		<thead>
+		  <tr>
+		    <th>Parameter Name</th>
+		    <th>Type</th>
+		    <th>Description</th>
+		    <th>Default Value</th>
+		  </tr>
+		</thead>
+		<tbody>
+		  <tr>
+		    <td>dataset</td>
+		    <td>number|array|boolean</td>
+		    <td>
+		        Which dataset to apply the formatting to.  If <code>true</code>, will apply formatting to every dataset.  If array, will apply formatting for each dataset in the array (datasets are numbered starting at 0).  If a number, will apply formatting to the dataset specified.
+		    </td>
+		    <td><code>0</code></td>
+		  </tr>
+		  <tr>
+		    <td>nodata</td>
+		    <td>boolean</td>
+		    <td>
+		      If true, the table for this dataset will be hidden.  This is useful if you only want to show a chart.
+		    </td>
+		    <td><code>false</code></td>
+		  </tr>
+		  <tr>
+		    <td>selectable</td>
+		    <td>boolean</td>
+		    <td>
+		      If true, a column will be added to the beginning of the dataset's table containing checkboxes for every row.  If a user checks one or more rows, any export links (e.g. "Download CSV") will only include the checked rows.
+		    </td>
+		    <td><code>false</code></td>
+		  </tr>
+		  <tr>
+		    <td>vertical</td>
+		    <td>boolean</td>
+		    <td>
+		      If true, the rows and columns will be flipped for the dataset's table.  For example, a report to list all the properties of a user might look something like this after the "vertical" option is set:
+		      <table class='table table-bordered'>
+			<tr>
+			  <th>Name</th>
+			  <td>John Smith</td>
+			  <td>Jane Doe</td>
+			</tr>
+			<tr>
+			  <th>Email</th>
+			  <td>john@test.com</td>
+			  <td>jane@test.com</td>
+			</tr>
+		      </table>
+		      <p>This works best when there would be many columns and only a couple rows.</p>
+		      <div class='alert alert-info'>Note: this option will disable sorting the report by column since that no longer makes sense.</div>
+		    </td>
+		    <td><code>false</code></td>
+		  </tr>
+		</tbody>
+	      </table>
+	      
+	    </section><!--/formatting header-->
+	    
+	    <section id="infos">
+	      <h3>Info Header</h3>
+	      
+	      <p>This Info header is used to set meta data about the report.  This includes name, description, type, and timestamp.</p>
+	      
+	      <table class="table table-bordered table-striped">
+		<thead>
+		  <tr>
+		    <th>Parameter Name</th>
+		    <th>Type</th>
+		    <th>Description</th>
+		    <th>Default Value</th>
+		  </tr>
+		</thead>
+		<tbody>
+		  <tr>
+		    <td>created</td>
+		    <td>string</td>
+		    <td>
+		      The date the report was created.  If this date is within 2 weeks, a "new" icon will be shown next to the report on the report list.  Must be in the format <code>YYYY-MM-DD</code>.
+		    </td>
+		    <td><code>null</code></td>
+		  </tr>
+		  <tr>
+		    <td>description</td>
+		    <td>string</td>
+		    <td>
+		      The report description.  Shows up underneath the title when running a report.
+		    </td>
+		    <td><code>""</code></td>
+		  </tr>
+		  <tr>
+		    <td>name</td>
+		    <td>string</td>
+		    <td>The name of the report.  Shows up on the report list, in report search, and as the title when running the report.</td>
+		    <td><code>""</code></td>
+		  </tr>
+		  <tr>
+		    <td>type</td>
+		    <td>string</td>
+		    <td>
+		      The type of report (e.g. "Mongo", "Pdo", "Ado", "AdoPivot", or "Php").  This is set automatically based on the file extension of the report, but can be overridden here.  For example, you can force a .js file to run as a PHP report (not sure why you would want to do this though).
+		    </td>
+		    <td>varies by file extension</td>
+		  </tr>
+		</tbody>
+	      </table>
+	    </section><!--/info header-->
+	      
+	  </section><!-- /headers -->
+	  <section id="filters">
+	    <h2>Report Filters</h2>
+	    
+	    <p>Report filters are used to modify columns in a report before outputting to a browser.  An example might be making a url column into a clickable link or making an ip address column into a city, state location.</p>
+	    
+	    <p>Filters are added to a report using the FILTER header.</p>
+	    
+	    <section>
+	      <h3>Class Filter</h3>
+	      
+	      <p>The Class filter is used to add a CSS class to all table cells in a column.  This is useful for things like right aligning numeric columns or changing the color or font.</p>
+	      
+	      <p>The classes <code>left</code>, <code>right</code>, and <code>center</code> can be used to align text.  In addition, any of the Twitter Bootstrap classes can be used as well (e.g. <code>muted</code> to make the text light gray).</p>
+	      
+	      <p>You can define your own CSS classes in <code>public/css/report.css</code>.</p>
+	      
+	      
+	      <table class="table table-bordered table-striped">
+		<thead>
+		  <tr>
+		    <th>Parameter Name</th>
+		    <th>Type</th>
+		    <th>Description</th>
+		    <th>Default Value</th>
+		  </tr>
+		</thead>
+		<tbody>
+		  <tr>
+		    <td>class</td>
+		    <td>string</td>
+		    <td>
+		      The class to apply to the table cells in the column.
+		    </td>
+		    <td><code>""</code></td>
+		  </tr>
+		</tbody>
+	      </table>
+	      
+	      <h4>Examples</h4>
+	      
+	      <pre class='prettyprint'>
+FILTER: {
+  filter: "class",
+  column: "Number Correct",
+  params: {
+    class: "right"
+  }
+}</pre>
+
+	      <pre class='prettyprint'>
+FILTER: {
+  filter: "class",
+  column: "Errors",
+  params: {
+    class: "text-error"
+  }
+}</pre>
+	      
+	    </section><!--/class filter-->
+	    <section>
+	      <h3>Date Filter</h3>
+	      
+	      <p>The Date filter is used to mark a column as a date.</p>
+	      
+	      <p>Date columns will do timezone adjustments automatically.  This is useful if your database server is in a different timezone than your users. For this to work, you need to specify a time offset for each database server in your config.</p>
+	      
+	      <p>You can also set the global date format for all date columns in your config.  The default is "Y-m-d H:i:s".</p>
+	      
+	      <table class="table table-bordered table-striped">
+		<thead>
+		  <tr>
+		    <th>Parameter Name</th>
+		    <th>Type</th>
+		    <th>Description</th>
+		    <th>Default Value</th>
+		  </tr>
+		</thead>
+		<tbody>
+		  <tr>
+		    <td>format</td>
+		    <td>string</td>
+		    <td>
+		      The date format to use.  If not defined, it will use the default format defined in your config.  If there is not default format, it will use "Y-m-d H:i:s".
+		    </td>
+		    <td>varies</td>
+		  </tr>
+		  <tr>
+		    <td>database</td>
+		    <td>string</td>
+		    <td>
+		      The database this column is coming from.  This is used to determine the timezone offset.  It defaults to the database the report is running on.  This is really only needed if you're joining across multiple databases, each with different timezone offsets.
+		    </td>
+		    <td>database of current report</td>
+		  </tr>
+		</tbody>
+	      </table>
+	      
+	      <h4>Examples</h4>
+	      
+	      <pre class="prettyprint">
+FILTER: {
+  filter: "date",
+  column: "Start Date"
+}</pre>
+	      <pre class="prettyprint">
+FILTER: {
+  filter: "date",
+  column: "End Date",
+  params: {
+    "format": "F j, i"
+  }
+}</pre>
+	    </section><!--/date filter-->
+	    
+	    <section>
+	      <h3>Hide Filter</h3>
+	      
+	      <p>The Hide filter removes a column from a report.  This is useful if you want to use a column in a chart, but don't want it actually appearing in the report.</p>
+	      
+	      <h4>Examples</h4>
+	      
+	      <pre class="prettyprint">
+FILTER: {
+  filter: "hide",
+  column: "Some Column"
+}</pre>
+	    </section><!--/hide filter-->
+	    
+	    <section>
+	      <h3>HTML Filter</h3>
+	      
+	      <p>The HTML filter renders the cells as HTML.  Without this filter, all values will be HTML escaped.</p>
+	      
+	      <h4>Examples</h4>
+	      
+	      <pre class="prettyprint">
+FILTER: {
+  filter: "html",
+  column: "HTML Preview"
+}</pre>
+	    </section><!--/html filter-->
+	    
+	    <section>
+	      <h3>GeoIP Filter</h3>
+	      
+	      <p>The GeoIP filter replaces an ip address with either "City, State" or "City, Country".</p>
+	      
+	      <p>In addition, it allows an ip address column to be used in a GeoChart.</p>
+	      
+	      <h4>Examples</h4>
+	      
+	      <pre class="prettyprint">
+FILTER: {
+  filter: "geoip",
+  column: "Ip Address"
+}</pre>
+
+	      <p>The following example shows the GeoIP filter being used with a GeoChart.  The GeoChart will show a map with markers located at the latitude and longitude of the ip addresses.  The size and color of the marker will indicate the revenue.</p>
+	      <pre class="prettyprint">
+FILTER: {
+  filter: "geoip",
+  column: "Ip Address"
+}
+CHART: {
+  columns: ["Ip Address", "Revenue"],
+  type: "GeoChart",
+  markers: true
+}</pre>
+	    </section><!--/geoip filter-->
+	    
+	    
+	    <section>
+	      <h3>Link Filter</h3>
+	      
+	      <p>The Link filter can be used to turn the contents of the cell into a clickable link.</p>
+	      
+	      <table class="table table-bordered table-striped">
+		<thead>
+		  <tr>
+		    <th>Parameter Name</th>
+		    <th>Type</th>
+		    <th>Description</th>
+		    <th>Default Value</th>
+		  </tr>
+		</thead>
+		<tbody>
+		  <tr>
+		    <td>url</td>
+		    <td>string</td>
+		    <td>
+		      The url to link to.  Defaults to the contents of the report cell.
+		    </td>
+		    <td>current value</td>
+		  </tr>
+		  <tr>
+		    <td>display</td>
+		    <td>string</td>
+		    <td>
+		      What to use as the link text.  Defaults to the contents of the report cell.
+		    </td>
+		    <td>current value</td>
+		  </tr>
+		  <tr>
+		    <td>blank</td>
+		    <td>boolean</td>
+		    <td>
+		      If true, the link will open in a new window (i.e. <code>target="_blank"</code> will be added to the link).
+		    </td>
+		    <td><code>false</code></td>
+		  </tr>
+		</tbody>
+	      </table>
+	      
+	      <h4>Examples</h4>
+	      
+	      <pre class="prettyprint">
+FILTER: {
+  filter: "link",
+  column: "Article Url"
+}</pre>
+	      <pre class="prettyprint">
+FILTER: {
+  filter: "link",
+  column: "Admin Link",
+  params: {
+    "display": "view admin",
+    "blank": true
+  }
+}</pre>
+	    </section><!--/link filter-->
+	    
+	    
+	    <section>
+	      <h3>Drilldown Filter</h3>
+	      
+	      <p>The Drilldown filter is used to link a column to another report.  An example is linking the "Customer Id" field in a report to an "Account Overview" report for that customer.</p>
+	      
+	      <table class="table table-bordered table-striped">
+		<thead>
+		  <tr>
+		    <th>Parameter Name</th>
+		    <th>Type</th>
+		    <th>Description</th>
+		    <th>Default Value</th>
+		  </tr>
+		</thead>
+		<tbody>
+		  <tr>
+		    <td>report</td>
+		    <td>string</td>
+		    <td>
+		      The report to link to.  This is relative to the currently running report.  To make it relative to the report directory instead, add a <code>/</code> to the front.
+		    </td>
+		    <td><code>null</code></td>
+		  </tr>
+		  <tr>
+		    <td>macros</td>
+		    <td>object</td>
+		    <td>
+		      Defines the macros to pass into the report you're linking to.  In the format: <code>{ "macroname": "macrovalue" }</code> for hard-coded values or <code>{ "macroname": {"column": "column name"} }</code> for referencing another column in the row.
+		    </td>
+		    <td><code>{}</code></td>
+		  </tr>
+		</tbody>
+	      </table>
+	      
+	      <h4>Examples</h4>
+	      
+	      <p>In the following example, the "Customer Name" column wil be linked to the <code>account-history.sql</code> report and will pass in the macros in the format <code>Id=1543&amp;Type=customer</code>.</p>
+	      
+	      <pre class="prettyprint">
+FILTER: {
+  filter: "drilldown",
+  column: "Customer Name",
+  params: {
+    report: "account-history.sql",
+    macros: {
+      "Type": "customer",
+      "Id": {
+	"column": "Customer Id"
+      }
+    }
+  }
+}</pre>
+	    </section><!--/drilldown filter-->
+	    
+	    <section>
+	      <h3>Pre Filter</h3>
+	      
+	      <p>The Pre Filter is for preformatted text and renders the value inside of <code>&lt;pre&gt;&lt;/pre&gt;</code> tags.</p>
+	      
+	      <h4>Examples</h4>
+	      
+	      <pre class="prettyprint">
+FILTER: {
+  filter: "pre",
+  column: "Customer Address"
+}</pre>  
+
+	    <section>
+	      <h3>Twig Filter</h3>
+	      
+	      <p>The Twig Filter lets you render a twig template using the row's values.</p>
+	      
+	      <table class="table table-bordered table-striped">
+		<thead>
+		  <tr>
+		    <th>Parameter Name</th>
+		    <th>Type</th>
+		    <th>Description</th>
+		    <th>Default Value</th>
+		  </tr>
+		</thead>
+		<tbody>
+		  <tr>
+		    <td>template</td>
+		    <td>string</td>
+		    <td>
+		      <p>The twig template.  If not defined, the cell's value will be used as the template.</p>
+		      <p>Two twig variables are available: <code>value</code> contains the filtered cell's value.  <code>row</code> is an object containing values for all the other cells in the row.</p>
+		    </td>
+		    <td>The cell's value</td>
+		  </tr>
+		  <tr>
+		    <td>html</td>
+		    <td>boolean</td>
+		    <td>
+		      If true, the value will not be HTML escaped.
+		    </td>
+		    <td><code>false</code></td>
+		  </tr>
+		</tbody>
+	      </table>
+	      
+	      <h4>Examples</h4>
+	      
+	      <pre class="prettyprint">
+FILTER: {
+  filter: "twig",
+  column: "admin_link",
+  params: {
+    template: "&lt;a href='http://example.com/admin/?id={{ row.product_id }}&amp;edit=true'&gt;{{ value }}&lt;/a&gt;"
+  }
+}</pre>  
+	    
+	    
+	    <section>
+	      <h3>Bar Filter</h3>
+	      
+	      <p>The Bar filter turns a numeric column into a bar chart.  The width of the bars are scaled relative to the other values in the column.</p>
+	      
+	      <table class="table table-bordered table-striped">
+		<thead>
+		  <tr>
+		    <th>Parameter Name</th>
+		    <th>Type</th>
+		    <th>Description</th>
+		    <th>Default Value</th>
+		  </tr>
+		</thead>
+		<tbody>
+		  <tr>
+		    <td>width</td>
+		    <td>number</td>
+		    <td>
+		      The max width of the bar in pixels.
+		    </td>
+		    <td><code>200</code></td>
+		  </tr>
+		</tbody>
+	      </table>
+	      
+	      <h4>Examples</h4>
+	      
+	      <pre class="prettyprint">
+FILTER: {
+  filter: "bar",
+  column: "Number of Orders"
+}</pre>
+
+	      <pre class="prettyprint">
+FILTER: {
+  filter: "bar",
+  column: "Customer Rating",
+  params: {
+    "width": 50
+  }
+}</pre>
+	    </section><!--/bar filter-->
+	    
+	  </section><!--/filters-->
+  	
+	  <section id="dashboards">
+	    <h2>Dashboards</h2>
+	    
+	    <p>Dashboards allow you to combine multiple reports in a single page.</p>
+	    
+	    <p>Each dashboard requires a JSON configuration file in <strong>dashboardDir</strong> (from config.php).</p>
+	    
+	    <p>You can see a list of all dashboards at <code>/dashboards/</code></p>
+	    
+	    <p>Here are the allowed top level fields in the JSON files:</p>
+	    
+	    <table class='table table-striped table-bordered'>
+	      <thead>
+	      <tr>
+		<th>Key</th>
+		<th>Description</th>
+	      </tr>
+	      </thead>
+	      <tbody>
+	      <tr>
+		<td>title</td>
+		<td>Shows up in the dashboard list and as a header in the dashboard.</td>
+	      </tr>
+	      <tr>
+		<td>description</td>
+		<td>Shows below the header in the dashboard (optional)</td>
+	      </tr>
+	      <tr>
+		<td>reports</td>
+		<td>An array of reports (see below)</td>
+	      </tr>
+	      </tbody>
+	    </table>
+	    
+	    <p>Each report is the reports array is an object with the following allowed fields:</p>
+	    
+	    <table class='table table-striped table-bordered'>
+	      <thead>
+	      <tr>
+		<th>Key</th>
+		<th>Description</th>
+	      </tr>
+	      </thead>
+	      <tbody>
+	      <tr>
+		<td>report</td>
+		<td>The path to the report.</td>
+	      </tr>
+	      <tr>
+		<td>title</td>
+		<td>Shows as a header above the report data (optional)</td>
+	      </tr>
+	      <tr>
+		<td>description</td>
+		<td>Shows below the header (optional)</td>
+	      </tr>
+	      <tr>
+		<td>macros</td>
+		<td>A JSON object containing macro variables to pass into the report (optional)</td>
+	      </tr>
+	      <tr>
+		<td>format</td>
+		<td>What format to display the report in.  Allowed formats are:
+		<ul>
+		  <li>html</li>
+		  <li>chart</li>
+		  <li>text</li>
+		</ul>
+		</td>
+	      </tr>
+	      <tr>
+		<td>newRow</td>
+		<td>If true, the report will start a new row in the dashboard.  Otherwise, it will be in the same row as the previous report.</td>
+	      </tr>
+	      <tr>
+		<td>class</td>
+		<td>CSS classes to apply to the report container.  The most common use case is specifying the width of the report with bootstrap's <code>col-*-*</code> classes.</td>
+	      </tr>
+	      <tr>
+		<td>style</td>
+		<td>Inline styles to apply to the report container.</td>
+	      </tr>
+	      </tbody>
+	    </table>
+	    
+	    <p>Here's a full example dashboard (taken from <code>sample_dashboards/timezone.json</code>)</p>
+	    
+	    
+	      <pre class="prettyprint">
+{
+  "title": "Timezone Dashboard",
+  "description": "Shows off the dashboard feature of Php Reports",
+  "reports": [
+    {
+      "report": "php/timezones.php",
+      "title": "ACST Timezone",
+      "macros": {
+        "region": "acst"
+      },
+      "format": "html",
+      "newRow": false,
+      "style": "max-height: 400px; overflow-y: auto; overflow-x: hidden;",
+      "class": "col-md-6"
+    },
+    {
+      "report": "php/timezones.php",
+      "title": "CDT Timezone",
+      "macros": {
+        "region": "cdt"
+      },
+      "format": "chart",
+      "newRow": false,
+      "class": "col-md-6"
+    }
+  ]
+}</pre>
+	    
+	  </section>
+            </section>
+          </section>
+        </div><!--/span-->
+      </div><!--/row-->
+
+      <hr>
+
+      <footer>
+        <p></p>
+      </footer>
+
+    </div><!--/.fluid-container-->
+
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="./docs_files/jquery-1.8.3.min.js"></script>
+    <script src="./docs_files/bootstrap.min.js"></script>
+    <script src="./docs_files/jquery-ui-1.10.0.custom.min.js"></script>
+    <script src="./docs_files/jquery.tocify.min.js"></script>
+    <script src="./docs_files/prettify.js"></script>
+    <script src="./docs_files/lang-sql.js"></script>
+    <script>
+      $("#toc").tocify({
+        selectors: "h2,h3",
+        scrollTo: 45
+      });
+      
+      
+      window.prettyPrint && prettyPrint()
+    </script>
+
+  
+
+</body></html>
