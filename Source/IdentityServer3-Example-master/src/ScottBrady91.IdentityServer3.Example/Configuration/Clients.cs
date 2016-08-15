@@ -25,7 +25,8 @@ namespace ScottBrady91.IdentityServer3.Example.Configuration
                         {
                             Constants.StandardScopes.OpenId,
                             Constants.StandardScopes.Profile,
-                            Constants.StandardScopes.Email
+                            Constants.StandardScopes.Email,
+                            Constants.StandardScopes.Roles
                         },
                     AccessTokenType = AccessTokenType.Jwt
                 },
