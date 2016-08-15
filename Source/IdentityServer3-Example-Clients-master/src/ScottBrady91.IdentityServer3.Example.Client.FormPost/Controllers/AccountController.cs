@@ -6,9 +6,24 @@ using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
+using System.IO;
+using System.Net;
+using System.Text;
+using System.Web.Script.Serialization;
+using Newtonsoft.Json;
+
 
 namespace ScottBrady91.IdentityServer3.Example.Client.FormPost.Controllers
 {
+    public class Profile
+    {
+        public String given_name;
+        public String sub;
+        public String family_name;
+        public String email;
+        public String[] role;
+    }
+
     public sealed class AccountController : Controller
     {
         private const string ClientUri = @"https://localhost:44304";
@@ -17,6 +32,7 @@ namespace ScottBrady91.IdentityServer3.Example.Client.FormPost.Controllers
         private const string AuthorizeUri = IdServBaseUri + @"/connect/authorize";
         private const string LogoutUri = IdServBaseUri + @"/connect/endsession";
 
+     
         public ActionResult SignIn()
         {
             var state = Guid.NewGuid().ToString("N");
@@ -24,8 +40,8 @@ namespace ScottBrady91.IdentityServer3.Example.Client.FormPost.Controllers
 
             var url = AuthorizeUri +
                       "?client_id=implicitclient" +
-                      "&response_type=id_token" +
-                      "&scope=openid email profile" +
+                      "&response_type=id_token token" +
+                      "&scope=openid email profile roles" +
                       "&redirect_uri=" + CallbackEndpoint +
                       "&response_mode=form_post" +
                       "&state=" + state +
@@ -49,11 +65,50 @@ namespace ScottBrady91.IdentityServer3.Example.Client.FormPost.Controllers
         {
             var token = this.Request.Form["id_token"];
             var state = this.Request.Form["state"];
+            var access_token = this.Request.Form["access_token"];
 
             var claims = await this.ValidateIdentityTokenAsync(token, state);
 
             var id = new ClaimsIdentity(claims, "Cookies");
             this.Request.GetOwinContext().Authentication.SignIn(id);
+
+            ServicePointManager.ServerCertificateValidationCallback +=
+                        (sender, cert, chain, sslPolicyErrors) => true;
+
+            // Create a request for the URL. 
+            WebRequest request = WebRequest.Create(
+              "https://localhost:44300/core/connect/userinfo");
+            // If required by the server, set the credentials.
+            //request.Credentials = CredentialCache.DefaultCredentials;
+
+            request.Headers["Authorization"] = "Bearer " + access_token;
+
+            // Get the response.
+            WebResponse response = request.GetResponse();
+            // Display the status.
+            Console.WriteLine(((HttpWebResponse)response).StatusDescription);
+            // Get the stream containing content returned by the server.
+            Stream dataStream = response.GetResponseStream();
+            // Open the stream using a StreamReader for easy access.
+            StreamReader reader = new StreamReader(dataStream);
+            // Read the content.
+            string responseFromServer = reader.ReadToEnd();
+            // Display the content.
+            Console.WriteLine(responseFromServer);
+            // Clean up the streams and the response.
+            reader.Close();
+            response.Close();
+
+            Profile profile = JsonConvert.DeserializeObject<Profile>(responseFromServer);
+
+            var given_name = profile.given_name;
+
+            HttpCookie myCookie = new HttpCookie("UserSettings");
+            myCookie["Font"] = "Arial";
+            myCookie["Color"] = "Blue";
+            myCookie.Expires = DateTime.Now.AddDays(1d);
+            Response.Cookies.Add(myCookie);
+
 
             return this.Redirect("/");
         }

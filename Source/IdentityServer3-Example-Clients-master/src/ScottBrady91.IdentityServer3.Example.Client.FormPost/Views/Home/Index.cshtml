@@ -1,5 +1,15 @@
 ﻿@{
     ViewBag.Title = "Home Page";
+
+    if (Request.Cookies["UserSettings"] != null)
+    {
+        string userSettings;
+        if (Request.Cookies["UserSettings"]["Font"] != null)
+        { 
+            userSettings = Request.Cookies["UserSettings"]["Font"]; 
+        }
+    }
+
 }
 
 <div class="jumbotron">
@@ -10,6 +20,7 @@
 <div class="row">
     <div class="col-md-10">
         <h3>Identity</h3>
+        
         @if (User.Identity.IsAuthenticated)
         {
             <p>
