@@ -107,6 +107,7 @@ namespace ScottBrady91.IdentityServer3.Example.Client.FormPost.Controllers
             profile_cookie["given_name"] = profile.given_name;
             profile_cookie["family_name"] = profile.family_name;
             profile_cookie["email"] = profile.email;
+            profile_cookie["id_token"] = token;
             string roles = "";
             for(var i = 0; i < profile.role.Length; i++)
             {
@@ -171,8 +172,19 @@ namespace ScottBrady91.IdentityServer3.Example.Client.FormPost.Controllers
 
         public ActionResult SignOut()
         {
+            string token = "";
+            if (Request.Cookies["Profile"] != null)
+            {
+                if (Request.Cookies["Profile"]["id_token"] != null)
+                {
+                    token = Request.Cookies["Profile"]["id_token"];
+                }
+            }
+
             this.Request.GetOwinContext().Authentication.SignOut();
-            return this.Redirect(LogoutUri);
+
+            string logout_url = LogoutUri + "?id_token_hint=" + token +"&post_logout_redirect_uri=" + "https://localhost:44304";
+            return this.Redirect(logout_url);
         }
     }
 }
