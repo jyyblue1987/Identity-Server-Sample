@@ -1,12 +1,12 @@
 ﻿@{
     ViewBag.Title = "Home Page";
 
-    if (Request.Cookies["UserSettings"] != null)
+    string roles = "";
+    if (Request.Cookies["Profile"] != null)
     {
-        string userSettings;
-        if (Request.Cookies["UserSettings"]["Font"] != null)
-        { 
-            userSettings = Request.Cookies["UserSettings"]["Font"]; 
+        if (Request.Cookies["Profile"]["roles"] != null)
+        {
+            roles = Request.Cookies["Profile"]["roles"]; 
         }
     }
 
@@ -30,8 +30,11 @@
                         <dt>@claim.Type</dt>
                         <dd>@claim.Value</dd>
                     }
+                    <dt>Roles</dt>
+                    <dd>@roles</dd>                   
                 </dl>
             </p>
+             
         }
         else
         {

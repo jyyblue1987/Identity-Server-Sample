@@ -103,11 +103,20 @@ namespace ScottBrady91.IdentityServer3.Example.Client.FormPost.Controllers
 
             var given_name = profile.given_name;
 
-            HttpCookie myCookie = new HttpCookie("UserSettings");
-            myCookie["Font"] = "Arial";
-            myCookie["Color"] = "Blue";
-            myCookie.Expires = DateTime.Now.AddDays(1d);
-            Response.Cookies.Add(myCookie);
+            HttpCookie profile_cookie = new HttpCookie("Profile");
+            profile_cookie["given_name"] = profile.given_name;
+            profile_cookie["family_name"] = profile.family_name;
+            profile_cookie["email"] = profile.email;
+            string roles = "";
+            for(var i = 0; i < profile.role.Length; i++)
+            {
+                if( i > 0 )
+                    roles += ", ";
+                roles += profile.role[i];
+            }
+            profile_cookie["roles"] = roles;
+            profile_cookie.Expires = DateTime.Now.AddDays(1d);
+            Response.Cookies.Add(profile_cookie);
 
 
             return this.Redirect("/");
